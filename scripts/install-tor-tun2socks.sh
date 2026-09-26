@@ -281,6 +281,16 @@ install -m 0644 "$REPO_DIR/polkit/51-tor-ext-tun2socks.rules" \
     /etc/polkit-1/rules.d/51-tor-ext-tun2socks.rules
 echo "   installed polkit rule"
 
+# ─── control cookie ACL (every tor start) ───────────────────────────
+install -m 0755 "$REPO_DIR/scripts/tor-ext-cookie-acl.sh" \
+    /usr/local/libexec/tor-ext/tor-ext-cookie-acl.sh
+install -d -m 0755 /etc/systemd/system/tor@default.service.d
+cat > /etc/systemd/system/tor@default.service.d/tor-ext-cookie-acl.conf <<'EOF'
+[Service]
+ExecStartPost=/usr/local/libexec/tor-ext/tor-ext-cookie-acl.sh
+EOF
+echo "   installed tor@default.service.d/tor-ext-cookie-acl.conf"
+
 # ─── reload daemons + restart tor (pick up new torrc) ───────────────
 systemctl daemon-reload
 systemctl reload polkit 2>/dev/null || systemctl restart polkit 2>/dev/null || true
@@ -297,6 +307,8 @@ if (( torrc_changed )); then
         fi
     done
 fi
+
+/usr/local/libexec/tor-ext/tor-ext-cookie-acl.sh 2>/dev/null || true
 
 cat <<EOM
 

@@ -13,6 +13,7 @@ import GObject from 'gi://GObject';
 import St from 'gi://St';
 import * as QuickSettings from 'resource:///org/gnome/shell/ui/quickSettings.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
@@ -814,32 +815,60 @@ class TorToggle extends QuickSettings.QuickMenuToggle {
     }
 });
 
-export const TorIndicator = GObject.registerClass(
-class TorIndicator extends QuickSettings.SystemIndicator {
-    _init(extension) {
-        super._init();
-        this._topIcon = this._addIndicator();
-        this._topIcon.gicon = _loadTorIcon(extension.path);
-        this._topIcon.visible = false;
+/** Always-visible top-panel onion; primary click toggles Tor on/off. */
+export const TorPanelButton = GObject.registerClass(
+class TorPanelButton extends PanelMenu.Button {
+    _init(extension, torToggle) {
+        super._init(0.0, _('Tor'), true);
+        this._toggle = torToggle;
+        this._torIcon = _loadTorIcon(extension.path);
+        this._icon = new St.Icon({
+            gicon: this._torIcon,
+            style_class: 'system-status-icon',
+        });
+        this.add_child(this._icon);
 
-        this._toggle = new TorToggle(extension);
-        this.quickSettingsItems.push(this._toggle);
-
-        // Phase 11: top-bar icon tracks the toggle's checked state.
-        this._syncIndicator();
-        this._checkedSigId = this._toggle.connect('notify::checked',
-            () => this._syncIndicator());
+        this._syncIcon();
+        this._checkedSigId = this._toggle.connect('notify::checked', () => this._syncIcon());
+        this._pressId = this.connect('button-press-event', (_actor, event) => {
+            if (event.get_button() !== Clutter.BUTTON_PRIMARY)
+                return Clutter.EVENT_PROPAGATE;
+            this._toggle.checked = !this._toggle.checked;
+            this._toggle.emit('clicked', this._toggle);
+            return Clutter.EVENT_STOP;
+        });
     }
 
-    _syncIndicator() {
-        this._topIcon.visible = this._toggle.checked;
+    _syncIcon() {
+        this._icon.opacity = this._toggle.checked ? 255 : 140;
     }
 
     destroy() {
+        if (this._pressId) {
+            try { this.disconnect(this._pressId); } catch (_) {}
+            this._pressId = 0;
+        }
         if (this._checkedSigId) {
             try { this._toggle.disconnect(this._checkedSigId); } catch (_) {}
             this._checkedSigId = 0;
         }
+        super.destroy();
+    }
+});
+
+export const TorIndicator = GObject.registerClass(
+class TorIndicator extends QuickSettings.SystemIndicator {
+    _init(extension) {
+        super._init();
+        this._toggle = new TorToggle(extension);
+        this.quickSettingsItems.push(this._toggle);
+    }
+
+    get toggle() {
+        return this._toggle;
+    }
+
+    destroy() {
         this.quickSettingsItems.forEach(i => i.destroy());
         this.quickSettingsItems = [];
         super.destroy();
