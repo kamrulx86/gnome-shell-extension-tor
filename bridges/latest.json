@@ -1,13 +1,13 @@
 {
-  "fetched_at": "2026-10-03T09:08:17Z",
+  "fetched_at": "2026-10-04T09:47:00Z",
   "source": "https://bridges.torproject.org/moat/circumvention/defaults",
   "counts": {
     "obfs4": 2
   },
   "bridges": {
     "obfs4": [
-      "obfs4 89.160.53.229:44121 317099261CC9891CB227B58F0EAD425A2A3EC293 cert=WGZfQnz8DTJGBSz1QGR6gdh+bXTi3WoUNVLYeWBpUOT3CpRi8SEXWJJ4MEDzQuraCacuVg iat-mode=0",
-      "obfs4 80.231.63.246:5223 38EA1BCFFBF793070DF1591D7A2637C63A2EC9D7 cert=Uy7p0oyvtn46dtodGT9y8Q7Wk7/OuGR93xYc2sUZyjAeEqHODIjBAIp42Ve02W3gvRcsQQ iat-mode=0"
+      "obfs4 135.180.19.229:9561 54061A693BF308D7276BA748FA5E70B4EF19C626 cert=eY5Nxi7VRYUvd7wIGwLteR3TDYVOmC4SQOMQYwfZbLfCXelXiP/2HXowaGHPMRSmfZXMMQ iat-mode=0",
+      "obfs4 185.177.207.142:8443 244DC22782A75359BFF18FD362BE1AA280ABBA8E cert=nD0Y+fu7tRDjKl0kbY4ZGemXPa320l7jxoC3z+eFJWRc0FCAPBs4d5aMNjV8KNxfc4a7QA iat-mode=0"
     ]
   }
 }
